@@ -2,13 +2,9 @@ package ru.rickh.model.menu;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-public interface Printable {
+public interface Printable<T> {
     Map<Integer,String> enumAsMap();
-    List<String> enumValues();
-    int getCommandNumber();
-    int getCommandName();
-
-
-
+    T[] enumValues();
 }
