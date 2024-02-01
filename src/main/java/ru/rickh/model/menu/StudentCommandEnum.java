@@ -10,9 +10,10 @@ import java.util.stream.Collectors;
 public enum StudentCommandEnum implements Printable<StudentCommandEnum> {
     ADD_STUDENT("Добавить студента"),
     DELETE_STUDENT("Удалить студента"),
+    ADD_STUDENT_GRADE("Добавить студенту оценку"),
     UPDATE_STUDENT_GRADE("Обновить оценку студента"),
     SHOW_ALL_STUDENTS_GRADES("Показать все оценки всех студентов"),
-    SHOW_STUDENT_GRADE("Показать оценку студента");
+    SHOW_STUDENT_GRADES("Показать оценки студента");
 
     private final String commandName;
 

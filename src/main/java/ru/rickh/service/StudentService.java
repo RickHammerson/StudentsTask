@@ -19,14 +19,17 @@ public class StudentService {
         students.add(new Student(studentName));
     }
     
-    public void delete(String studentName) {
-        students.remove(studentName);
+    public boolean delete(String studentName) {
+        return students.removeIf(a->studentName.equals(a.getName()));
     }
     
     public Optional<Student> getStudent(String stringInput) {
         return students.stream().filter(a -> a.getName().equals(stringInput)).findFirst();
     }
     public String getStudentGrades(List<Integer> grades) {
+        if (grades == null || grades.isEmpty()) {
+            return "Нет оценок";
+        }
         return grades.stream().map(Object::toString).collect(Collectors.joining(","));
     }
     

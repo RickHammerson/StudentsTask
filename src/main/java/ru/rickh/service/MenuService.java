@@ -30,7 +30,7 @@ public class MenuService {
         PrintUtils.printText("Добро пожаловать.Выберите способ загрузки студентов");
         Menu<FileLoadCommandEnum> loadStudentsMenu = new Menu<>(FileLoadCommandEnum.LOAD_STUDENTS_FILE);
         PrintUtils.printEnumValues(loadStudentsMenu.getEnumValuesMap());
-        int inputNumber = getIntInput(loadStudentsMenu.getExitNumber());
+        int inputNumber = getIntInput(0,loadStudentsMenu.getExitNumber());
         FileLoadCommandEnum value = loadStudentsMenu.getEnumValueByOrdinal(inputNumber);
         
         try {
@@ -43,7 +43,7 @@ public class MenuService {
                 case CREATE_NEW_STUDENTS_FILE:
                 default:
                     PrintUtils.printText("Создаем новый файл со студентами");
-                    new StudentService(fileService.create());
+                    studentService=new StudentService(fileService.create());
                     PrintUtils.printText("Новый файл со студентами успешно создан");
                     break;
             }
@@ -57,66 +57,37 @@ public class MenuService {
     }
     
     private void studentsMenu() {
-        
         Menu<StudentCommandEnum> studentGradesMenu = new Menu<>(StudentCommandEnum.ADD_STUDENT);
         PrintUtils.printEnumValues(studentGradesMenu.getEnumValuesMap());
-        int inputNumber = getIntInput(studentGradesMenu.getExitNumber());
-        if (inputNumber == studentGradesMenu.getExitNumber()) {
-            PrintUtils.printText("Я хочу питсу");
-            System.exit(0);
-        }
-        StudentCommandEnum value = studentGradesMenu.getEnumValueByOrdinal(inputNumber);
+        int exitNumber = studentGradesMenu.getExitNumber();
+        PrintUtils.printExitCommand(exitNumber);
         try {
+            int inputNumber = getIntInput(0,exitNumber);
+            if (inputNumber == exitNumber) {
+                PrintUtils.printText("Я хочу питсу");
+                System.exit(0);
+            }
+            StudentCommandEnum value = studentGradesMenu.getEnumValueByOrdinal(inputNumber);
             switch (value) {
                 case ADD_STUDENT:
-                    PrintUtils.printText("Введите имя студента");
-                    studentService.add(getStringInput());
-                    fileService.save(studentService.getStudents());
+                    addStudent();
                     break;
                 case DELETE_STUDENT:
-                    PrintUtils.printText("Введите имя студента");
-                    studentService.delete(getStringInput());
-                    fileService.save(studentService.getStudents());
+                    deleteStudent();
                     break;
-                case SHOW_ALL_STUDENTS_GRADES:
-                    List<Student> students = studentService.getStudents();
-                    for (Student student : students) {
-                        PrintUtils.printText(String.format(
-                            "Студент с именем %s. Имеет оценки %s",
-                            student.getName(),
-                            studentService.getStudentGrades(student.getGrades())
-                        ));
-                    }
-                    break;
-                case SHOW_STUDENT_GRADE:
-                    PrintUtils.printText("Введите имя студента");
-                    Optional<Student> optionalStudent = studentService.getStudent(getStringInput());
-                    if (optionalStudent.isPresent()) {
-                        Student student = optionalStudent.get();
-                        PrintUtils.printText(String.format(
-                            "Студент с именем %s. Имеет оценки %s",
-                            student.getName(),
-                            studentService.getStudentGrades(student.getGrades())
-                        ));
-                    } else {
-                        PrintUtils.printText("Студента с таким именем нет");
-                    }
+                case ADD_STUDENT_GRADE:
+                    addStudentGrade();
                     break;
                 case UPDATE_STUDENT_GRADE:
-                    PrintUtils.printText("Введите имя студента");
-                    Optional<Student> studentForGradeUpdate = studentService.getStudent(getStringInput());
-                    if (studentForGradeUpdate.isPresent()) {
-                        Student student = studentForGradeUpdate.get();
-                        List<Integer> grades = student.getGrades();
-                        Map<Integer, Integer> gradesMap = IntStream.range(0, grades.size())
-                            .boxed()
-                            .collect(Collectors.toMap(i -> i, grades::get));
-                        PrintUtils.printGrades(gradesMap);
-                        fileService.save(studentService.getStudents());
-                    } else {
-                        PrintUtils.printText("Студента с таким именем нет");
-                    }
+                    updateStudentGrade();
                     break;
+                case SHOW_ALL_STUDENTS_GRADES:
+                    showAllStudentGrades();
+                    break;
+                case SHOW_STUDENT_GRADES:
+                    showStudentGrades();
+                    break;
+                
             }
         } catch (InputError e) {
             PrintUtils.printText("Введено неверное значение");
@@ -124,5 +95,84 @@ public class MenuService {
             PrintUtils.printText("Невозможно сохранить студентов в файл");
         }
         studentsMenu();
+    }
+    
+    private void addStudentGrade() throws IOException {
+        PrintUtils.printText("Введите имя студента");
+        Optional<Student> studentForGradeAdd = studentService.getStudent(getStringInput());
+        if (studentForGradeAdd.isPresent()) {
+            Student student = studentForGradeAdd.get();
+            PrintUtils.printText("Введите оценку");
+            int inputNumber = getIntInput(2,5);
+            student.addGrade(inputNumber);
+            fileService.save(studentService.getStudents());
+        } else {
+            PrintUtils.printText("Студента с таким именем нет");
+        }
+    }
+    
+    private void updateStudentGrade() throws IOException {
+        PrintUtils.printText("Введите имя студента");
+        Optional<Student> studentForGradeUpdate = studentService.getStudent(getStringInput());
+        if (studentForGradeUpdate.isPresent()) {
+            Student student = studentForGradeUpdate.get();
+            List<Integer> grades = student.getGrades();
+            Map<Integer, Integer> gradesMap = IntStream.range(0, grades.size())
+                .boxed()
+                .collect(Collectors.toMap(i -> i, grades::get));
+            PrintUtils.printGrades(gradesMap);
+            PrintUtils.printText("Введите номер оценки студента на изменение");
+            int gradeIndex = getIntInput(0,gradesMap.size());
+            PrintUtils.printText("Введите оценку");
+            int grade = getIntInput(2,5);
+            grades.set(gradeIndex, grade);
+            fileService.save(studentService.getStudents());
+        } else {
+            PrintUtils.printText("Студента с таким именем нет");
+        }
+    }
+    
+    private void showStudentGrades() {
+        PrintUtils.printText("Введите имя студента");
+        Optional<Student> optionalStudent = studentService.getStudent(getStringInput());
+        if (optionalStudent.isPresent()) {
+            Student student = optionalStudent.get();
+            PrintUtils.printText(String.format(
+                "Студент с именем %s. Имеет оценки: %s",
+                student.getName(),
+                studentService.getStudentGrades(student.getGrades())
+            ));
+        } else {
+            PrintUtils.printText("Студента с таким именем нет");
+        }
+    }
+    
+    private void showAllStudentGrades() {
+        List<Student> students = studentService.getStudents();
+        if (students.isEmpty()) {
+            PrintUtils.printText("Нет студентов");
+        }
+        for (Student student : students) {
+            PrintUtils.printText(String.format(
+                "Студент с именем %s. Имеет оценки: %s",
+                student.getName(),
+                studentService.getStudentGrades(student.getGrades())
+            ));
+        }
+    }
+    
+    private void deleteStudent() throws IOException {
+        PrintUtils.printText("Введите имя студента");
+        if (studentService.delete(getStringInput())) {
+            fileService.save(studentService.getStudents());
+        } else {
+            PrintUtils.printText("Студент не найден");
+        }
+    }
+    
+    private void addStudent() throws IOException {
+        PrintUtils.printText("Введите имя студента");
+        studentService.add(getStringInput());
+        fileService.save(studentService.getStudents());
     }
 }

@@ -10,6 +10,7 @@ import ru.rickh.model.Student;
 import ru.rickh.util.PrintUtils;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ public class FileService {
     }
     
     public void save(List<Student> students) throws IOException {
-        objectMapper.writeValue(studentsFile, students);
+        FileWriter fileWriter = new FileWriter(studentsFile,false);
+        objectMapper.writeValue(fileWriter, students);
     }
 }
