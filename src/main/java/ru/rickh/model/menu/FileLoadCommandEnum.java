@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter
-public enum FileLoadCommandEnum implements Printable {
+public enum FileLoadCommandEnum implements Printable<FileLoadCommandEnum> {
     LOAD_STUDENTS_FILE( "Загрузить из файла"),
     CREATE_NEW_STUDENTS_FILE( "Создать новый файл");
 

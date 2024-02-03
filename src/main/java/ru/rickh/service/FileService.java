@@ -33,7 +33,7 @@ public class FileService {
         return objectMapper.readValue(file,new TypeReference<List<Student>>(){});
     }
     
-    public List<Student> create() throws RuntimeException, IOException {
+    public List<Student> create() throws  IOException {
         this.studentsFile = new File("created.txt");
         studentsFile.createNewFile();
         return new ArrayList<>();

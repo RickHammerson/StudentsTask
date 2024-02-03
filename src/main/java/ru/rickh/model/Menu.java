@@ -6,7 +6,7 @@ import lombok.Data;
 import ru.rickh.model.menu.Printable;
 
 @Data
-public class Menu<T> {
+public class Menu<T extends Printable<T>> {
     private int exitNumber;
     private Map<Integer,String> enumValuesMap;
     private Printable<T> menuEnum;
